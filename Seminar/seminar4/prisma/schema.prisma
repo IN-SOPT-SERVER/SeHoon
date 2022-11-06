@@ -8,7 +8,17 @@ datasource db {
 }
 
 model User {
-  id   Int @id(map: "user_pk") @unique(map: "user_id_uindex") @default(autoincrement())
+  id       Int     @id(map: "user_pk") @unique(map: "user_id_uindex") @default(autoincrement())
   userName String
+  age      Int?
+  email    String? @db.VarChar(400)
 }
 
+model User_Server {
+  id           Int     @id(map: "user_server_pk") @unique(map: "user_server_id_uindex") @default(autoincrement())
+  name         String  @db.VarChar(10)
+  profileImage String? @db.VarChar(400)
+  bio          String? @db.VarChar(400)
+  email        String? @unique(map: "user_server_email_uindex") @db.VarChar(100)
+  password     String? @db.VarChar(50)
+}

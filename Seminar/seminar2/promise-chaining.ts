@@ -7,9 +7,9 @@ const me = (callback: () => void, time: number) => {
 const wakeUp = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     me(() => {
-      console.log("[현재] 일어남");
-      resolve("일어남");
-    }, 1000);
+      console.log("[현재] 기상!");
+      resolve("기상");
+    }, 3000);
   });
 };
 
