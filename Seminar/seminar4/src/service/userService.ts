@@ -1,17 +1,47 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { sc } from "../constants";
+import { UserCreateDTO } from "../interfaces/user/UserCreateDTO";
+import { UserSignInDTO } from "../interfaces/user/UserSignInDTO";
+
 const prisma = new PrismaClient();
 
-//* 유저 생성
-const createUser = async (name: string, email: string, age: number) => {
+//* 회원가입
+const createUser = async (userCreateDto: UserCreateDTO) => {
+  //? 넘겨받은 password를 bcrypt의 도움을 받아 암호화
+  const salt = await bcrypt.genSalt(10); //^ 매우 작은 임의의 랜덤 텍스트 salt
+  const password = await bcrypt.hash(userCreateDto.password, salt); //^ 위에서 랜덤을 생성한 salt를 이용해 암호화
+
   const data = await prisma.user.create({
     data: {
-      userName: name,
-      age,
-      email,
+      userName: userCreateDto?.name,
+      age: userCreateDto?.age,
+      email: userCreateDto.email,
+      password,
     },
   });
 
   return data;
+};
+
+//* 로그인
+const signIn = async (userSignInDto: UserSignInDTO) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: userSignInDto.email,
+      },
+    });
+    if (!user) return null;
+
+    const isMatch = await bcrypt.compare(userSignInDto.password, user.password);
+    if (!isMatch) return sc.UNAUTHORIZED;
+
+    return user.id;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
 //* 유저 전체 조회
@@ -56,6 +86,7 @@ const getUserById = async (userId: number) => {
 
 const userService = {
   createUser,
+  signIn,
   getAllUser,
   updateUser,
   deleteUser,
